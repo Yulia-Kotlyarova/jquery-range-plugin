@@ -1,7 +1,7 @@
 (function($){
     jQuery.fn.responsiveBlock = function(){
       let make = function(){
-        console.log(this);
+        // console.log(this);
         // $(this).css("background-color",options.defColor)
         // .mouseenter( function(){
         //   $(this).css("background-color",options.hoverColor);
