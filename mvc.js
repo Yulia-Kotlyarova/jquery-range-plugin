@@ -1,8 +1,8 @@
+
 class Model {
     constructor() {
         this.items = [];
         this.observers = [];
-        // this = makeObservableSubject();
         this.selectedIndex = -1;
     }
     addObserver =  (o) => {
@@ -98,7 +98,6 @@ class View {
         select.attr('size', '4');
         let buttonAdd = $('<button>+</button>').appendTo(this.placeForAdd).height(20);
         let buttonRemove = $('<button>-</button>').appendTo(this.placeForAdd).height(20);
-        // console.log(controller);
     
         buttonAdd.bind('click', () => {
             this.controller.actionAddItem(prompt('add value'));
