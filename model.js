@@ -105,10 +105,9 @@ class ViewSlider {
         this.controller = controller;
     }
     getCoords(elem) {
-        let unit = elem.getBoundingClientRect();
         return {
-            top: unit.top + pageYOffset,
-            left: unit.left + pageXOffset
+            top: elem.clientX + pageYOffset,
+            left: elem.clientY+ pageXOffset
         };
     } 
     renderLayout = () => {
@@ -125,58 +124,33 @@ class ViewSlider {
         // this.btn_2 = $(`<button class="range__slider-handle range__btn-2"></button>`);
         // this.btn_2.appendTo(placeForAdd).offset({top:`${top}`, left:`${left}`});
 
-        let input = $(`<input id='${name}' class='range__input1' type='number' min='20' max='700'>
+        this.input = $(`<input id='${name}' class='range__input1' type='number' min='20' max='700'>
         - <input id='id66i2' class='range__input2' type='number' min='20' max='700'>`).appendTo(placeForAdd);
 
-        let move = (event) => {
-            let sliderCoords = this.getCoords($('range-1'));
-            let between = $('range__slider-range');
-            let betweenCoords = this.getCoords(between); 
-            let buttonCoords1 = this.getCoords(this.btn_1);
-            let buttonCoords2 = this.getCoords(this.btn_2);
-            let shift_1 = event.pageX - buttonCoords1.left;
-            let shift_2 = event.pageX - buttonCoords2.left; 
-            // this.btn_1.offset({top:`${top}`, left:`${event.pageY}`});
-            let left1 = event.pageX - shift_1 - sliderCoords.left;
-                let right1 = slider.offsetWidth - this.btn_1.offsetWidth;
-                if (left1 < 0) left1 = 0;
-                if (left1 > right1) left1 = right1;
-                this.btn_1.style.marginLeft = left1 + 'px';  
-                
-                
-                shift_2 = event.pageX - buttonCoords2.left; 
-                let left2 = event.pageX - shift_2 - sliderCoords.left;
-                let right2 = slider.offsetWidth - button2.offsetWidth;
-                if (left2 < 0) left2 = 0;
-                if (left2 > right2) left2 = right2;            
-                
-                    let per_min = 0;
-                    let per_max = 0;
-                if (left1 > left2) {
-                    between.style.width = (left1-left2) + 'px';
-                    between.style.marginLeft = left2 + 'px';
-                    
-                    per_min = left2*100/(slider.offsetWidth-this.btn_1.offsetWidth);
-                    per_max = left1*100/(slider.offsetWidth-this.btn_1.offsetWidth);
-                } else {
-                    between.style.width = (left2-left1) + 'px';
-                    between.style.marginLeft = left1 + 'px';                
-                    
-                    per_min = left1*100/(slider.offsetWidth-this.btn_1.offsetWidth);
-                    per_max = left2*100/(slider.offsetWidth-this.btn_1.offsetWidth);
-                };
-                    input1.value= (parseInt(min)+Math.round((max-min)*per_min/100));
-                    input2.value= (parseInt(min)+Math.round((max-min)*per_max/100)); 
-            
+        this.slider = $('.range-1');
+        this.sliderCoords = this.getCoords($('.range-1'));
+        this.between = $('.range__slider-range');
+        this.betweenCoords = this.getCoords($('.range__slider-range')); 
+        this.shift_1 = this.getCoords($('range__btn-1'));
+        this.shift_2 = this.getCoords($('range__btn-2'));
+        this.input_1 = $('.range__input1');
+        this.input_2 = $('.range__input2');
+
+        let move_btn_1 = (event) => {
+            console.log(this.sliderCoords, this.betweenCoords, this.shift_1, this.input_1);
+                        // let diff = this.btn_1.position().left - this.btn_1.offset().left;
+            // this.btn_1.offset({top:`${top}`, left:`${event.pageY + diff}`});
+            this.btn_1.off('onmouseup', move_btn_1);
+            this.btn_1.on('mousemove', move_btn_1);
         };
 
-        this.btn_1.on('mousedown', (event) => {
-            // let diff = this.btn_1.position().left - this.btn_1.offset().left;
-            // this.btn_1.offset({top:`${top}`, left:`${event.pageY + diff}`});
-            this.btn_1.off('onmouseup', move);
-            this.btn_1.on('mousemove', move);
-            return false;
-        });
+
+        this.btn_1.on('mousedown', move_btn_1);
+
+        // this.btn_2.on('mousedown', (event) => {
+        //     this.btn_2.off('onmouseup', move_btn_2);
+        //     this.btn_2.on('mousemove', move_btn_2);
+        // });
     }
 };
 
@@ -188,6 +162,13 @@ $(document).ready(function () {
     let view = new ViewSlider(controller);
     view.renderLayout();
 });
+
+
+class Button {
+    constructor() {
+        
+    }
+}
 
 
 // class Model {
