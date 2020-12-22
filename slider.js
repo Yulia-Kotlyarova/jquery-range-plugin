@@ -11,13 +11,14 @@ class ModelSlider {
         };
     } 
 
-    settings(min, max, btn1Value, btn2Value, pace) {
+    settings(min, max, btn1Value, btn2Value, pace, position) {
         return (
             this.min = min,
             this.max = max,
             this.btn1Value = btn1Value,
             this.btn2Value = btn2Value,
-            this.pace = pace
+            this.pace = pace,
+            this.position = position
         )
     }
 
@@ -38,6 +39,12 @@ class ModelSlider {
         this.between.css({'width': between_width + 'px', 'left': between_shift});
     }
 
+    betweenSettingVert = () => {
+        let between_height = this.btn_2.offset().top - this.btn_1.offset().top;
+        let between_shift = this.btn_1.css('top');
+        this.between.css({'height': between_height + 'px', 'top': between_shift});
+    }
+
     getProps() {
         return {
             placement: this.placement,
@@ -52,10 +59,12 @@ class ModelSlider {
             min: this.min,
             max: this.max,
             pace: this.pace,
+            position: this.position,
             btn1Value: this.btn1Value,
             btn2Value: this.btn2Value,
             getCoords: this.getCoords,
             betweenSetting: this.betweenSetting,
+            betweenSettingVert: this.betweenSettingVert
         }
     }
 }
@@ -66,7 +75,10 @@ class ControllerSlider {
     }
     
     inputValue = () => {
-        let shiftUnit = (this.props.max - this.props.min) / this.props.slider.outerWidth();
+        let props = this.props;
+        let sliderSize = (props.position === 'vertical') ? props.slider.height() : props.slider.outerWidth();
+        console.log(sliderSize);
+        let shiftUnit = (props.max - props.min) / sliderSize;
         this.shiftUnit = Math.ceil(shiftUnit); // ratio of slider width and min-max width
         console.log('pace:' + this.shiftUnit);
     }
@@ -94,6 +106,31 @@ class ControllerSlider {
         props['input_' + i].val(roundedValue);
     }
 
+    move_btn_1_vert = (event) => {
+        let props = this.props;
+        let sliderCoords = props.getCoords(props.slider);
+        let shift_btn_1 = event.pageY - sliderCoords.top - props.btn_1.height() / 2 ;
+        this.shift_btn_1 = shift_btn_1;
+        
+        let top1 = sliderCoords.top;
+        let bottom1 = props.btn_2.position().top;
+
+        props.btn_1.css({'top': shift_btn_1  + 'px'});
+
+        if (props.btn_1.offset().top > bottom1) {
+            props.btn_1.css({'top': props.btn_2.css('top') - 100 + 'px'});
+        }
+        if(props.btn_1.offset().top < top1){
+            props.btn_1.css({'top': 0 + 'px'});
+        }
+        props.betweenSettingVert();
+        this.renderInputValue(1);
+
+        props.btn_1.ondragstart = function() {
+          return false;
+        };
+    }
+
     move_btn_1 = (event) => {
         let props = this.props;
         let sliderCoords = props.getCoords(props.slider);
@@ -115,6 +152,34 @@ class ControllerSlider {
         this.renderInputValue(1);
 
         props.btn_1.ondragstart = function() {
+          return false;
+        };
+    }
+
+    
+    move_btn_2_vert = (event) => {
+        let props = this.props;
+        let sliderCoords = props.getCoords(props.slider);
+        let shift_btn_2 = event.pageY - sliderCoords.top - props.btn_2.innerHeight() / 2 - parseInt(props.btn_2.css('marginTop')); 
+        this.shift_btn_2 = shift_btn_2;
+        props.btn_2.css({'top': shift_btn_2  + 'px'});
+
+        let top2 = props.btn_1.position().top;
+        let bottom2 = sliderCoords.top + props.slider.outerHeight();
+
+        let max_top = parseInt(props.slider.css('height')) - parseInt(props.btn_2.css('marginTop'));
+
+        if (props.btn_2.offset().top > bottom2) {
+            props.btn_2.css({'top': max_top + 'px'});
+        }
+        if(props.btn_2.offset().top < top2){
+            props.btn_2.css({'top': props.btn_1.css('top')});
+        }
+
+        props.betweenSettingVert();
+        this.renderInputValue(2);
+
+        props.btn_2.ondragstart = function() {
           return false;
         };
     }
@@ -167,28 +232,50 @@ class ViewSlider {
 class ViewBtn extends ViewSlider {
     btnMove() {
         let props = this.props;
-        props.btn_1.css({'left': props.btn1Value / this.controller.shiftUnit  + 'px'});
-        props.btn_2.css({'left': props.btn2Value / this.controller.shiftUnit + 'px'});
+        let vert = () => {
+            props.btn_1.css({'top': props.btn1Value / this.controller.shiftUnit  + 'px'});
+            props.btn_2.css({'top': props.btn2Value / this.controller.shiftUnit + 'px'});
+    
+            props.btn_1.on('mousedown', () => {
+                props.btn_1.on('mousemove', this.controller.move_btn_1_vert);
+                props.btn_1.on('mouseup', () => {
+                    props.btn_1.off('mousemove', this.controller.move_btn_1_vert);
+                });
+            });
+            props.btn_2.on('mousedown', () => {
+                props.btn_2.on('mousemove', this.controller.move_btn_2_vert);
+                props.btn_2.on('mouseup', () => {
+                    props.btn_2.off('mousemove', this.controller.move_btn_2_vert);
+                });
+            });
+        }
+        if (props.position === 'vertical' ) {
+            vert();
+        } else {
+            props.btn_1.css({'left': props.btn1Value / this.controller.shiftUnit  + 'px'});
+            props.btn_2.css({'left': props.btn2Value / this.controller.shiftUnit + 'px'});
+    
+            props.btn_1.on('mousedown', () => {
+                props.btn_1.on('mousemove', this.controller.move_btn_1);
+                props.btn_1.on('mouseup', () => {
+                    props.btn_1.off('mousemove', this.controller.move_btn_1);
+                });
+            });
+            props.btn_2.on('mousedown', () => {
+                props.btn_2.on('mousemove', this.controller.move_btn_2);
+                props.btn_2.on('mouseup', () => {
+                    props.btn_2.off('mousemove', this.controller.move_btn_2);
+                });
+            });
+        }
 
-        props.btn_1.on('mousedown', () => {
-            props.btn_1.on('mousemove', this.controller.move_btn_1);
-            props.btn_1.on('mouseup', () => {
-                props.btn_1.off('mousemove', this.controller.move_btn_1);
-            });
-        });
-        props.btn_2.on('mousedown', () => {
-            props.btn_2.on('mousemove', this.controller.move_btn_2);
-            props.btn_2.on('mouseup', () => {
-                props.btn_2.off('mousemove', this.controller.move_btn_2);
-            });
-        });
     }
 }
 
 class Input extends ViewSlider {
     renderInput() {
         let props = this.props;
-        props.value_box.appendTo(props.slider);
+        props.value_box.appendTo(props.placement);
         props.input_1.appendTo(props.value_box);
         props.input_2.appendTo(props.value_box);
         let value_1 = props.pace !== 1 &&  props.pace !== 0 ? Math.round(props.btn1Value / props.pace) * props.pace : props.btn2Value;
@@ -201,14 +288,14 @@ class Between extends ViewSlider {
     betweenChange() {
         let props = this.props;
         props.between.appendTo(props.slider);
-        props.betweenSetting();
+        (props.position === 'vertical') ? props.betweenSettingVert() : props.betweenSetting();
     }
 }
 
-let createSlider = (name, place, min = 0, max = 5000, btn1Value = 500, btn2Value = 1500, pace = 40) => {
+let createSlider = (name, place, min = 0, max = 5000, btn1Value = 500, btn2Value = 1500, pace = 50, position = 'horizontal') => {
     let model = new ModelSlider(name, place);
     model.setSlider();
-    model.settings( min, max, btn1Value, btn2Value, pace);
+    model.settings( min, max, btn1Value, btn2Value, pace, position);
     let controller = new ControllerSlider(model);
     controller.renderSlider();
     controller.inputValue();
@@ -223,4 +310,6 @@ let createSlider = (name, place, min = 0, max = 5000, btn1Value = 500, btn2Value
     between.betweenChange();
 }
 createSlider('id-name', $('#range-1'));
-createSlider('name-name', $('#range-2'), min = 0, max = 2000,);
+createSlider('name-name', $('#range-2'), min = 0, max = 2000, 100, 2300);
+createSlider('$', $('#range-3'), 0,2000, 50, 1500, 10, 'vertical');
+createSlider('&', $('#range-4'), 0,3000, 300, 2400, 100, 'vertical');
