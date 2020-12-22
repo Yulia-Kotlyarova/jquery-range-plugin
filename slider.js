@@ -11,12 +11,13 @@ class ModelSlider {
         };
     } 
 
-    settings(min, max, btn1Value, btn2Value) {
+    settings(min, max, btn1Value, btn2Value, pace) {
         return (
             this.min = min,
             this.max = max,
             this.btn1Value = btn1Value,
-            this.btn2Value = btn2Value
+            this.btn2Value = btn2Value,
+            this.pace = pace
         )
     }
 
@@ -50,6 +51,7 @@ class ModelSlider {
             slider_name: this.slider_name,
             min: this.min,
             max: this.max,
+            pace: this.pace,
             btn1Value: this.btn1Value,
             btn2Value: this.btn2Value,
             getCoords: this.getCoords,
@@ -65,21 +67,31 @@ class ControllerSlider {
     
     inputValue = () => {
         let shiftUnit = (this.props.max - this.props.min) / this.props.slider.outerWidth();
-        this.shiftUnit = Math.ceil(shiftUnit);
-        console.log(this.shiftUnit);
+        this.shiftUnit = Math.ceil(shiftUnit); // ratio of slider width and min-max width
+        console.log('pace:' + this.shiftUnit);
     }
     renderInputValue = (i) => {
-        let maxShift = this.props.max / this.shiftUnit;
-        if (this['shift_btn_' + i] <= this.props.min) {
-            this['shift_btn_' + i] =  this.props.min;
+        let props = this.props;
+        let maxShift = props.max / this.shiftUnit;
+        if (this['shift_btn_' + i] <= props.min) { // limit value on boundaries of slider
+            this['shift_btn_' + i] =  props.min;
         };
-        if (this['shift_btn_' + i] >= maxShift) {
+        if (this['shift_btn_' + i] >= maxShift) { // limit value on boundaries of slider
             this['shift_btn_' + i] =  maxShift;
         };
-        let value = this.shiftUnit * this['shift_btn_' + i];
-        console.log(this.shiftUnit, this['shift_btn_' + i]);
 
-        this.props['input_' + i].val(value);
+        let value = this.shiftUnit * this['shift_btn_' + i];
+
+        let roundValue = () => { // round value for input
+            if (props.pace !== 1 &&  props.pace !== 0) {
+                return Math.round(value / props.pace)* props.pace;
+            } else {
+                return value;
+            }
+        };
+        let roundedValue = roundValue();
+
+        props['input_' + i].val(roundedValue);
     }
 
     move_btn_1 = (event) => {
@@ -179,7 +191,8 @@ class Input extends ViewSlider {
         props.value_box.appendTo(props.slider);
         props.input_1.appendTo(props.value_box);
         props.input_2.appendTo(props.value_box);
-        props.input_1.val(props.btn1Value);
+        let value_1 = props.pace !== 1 &&  props.pace !== 0 ? Math.round(props.btn1Value / props.pace) * props.pace : props.btn2Value;
+        props.input_1.val(value_1);
         props.input_2.val(props.btn2Value);
     }
 }
@@ -192,10 +205,10 @@ class Between extends ViewSlider {
     }
 }
 
-let createSlider = (name, place, min = 0, max = 5000, btn1Value = 500, btn2Value = 1500) => {
+let createSlider = (name, place, min = 0, max = 5000, btn1Value = 500, btn2Value = 1500, pace = 40) => {
     let model = new ModelSlider(name, place);
     model.setSlider();
-    model.settings( min, max, btn1Value, btn2Value);
+    model.settings( min, max, btn1Value, btn2Value, pace);
     let controller = new ControllerSlider(model);
     controller.renderSlider();
     controller.inputValue();
