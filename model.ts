@@ -98,7 +98,6 @@ constructor(model: any) {
 inputValue = ():void => {
     let props = this.props;
     let sliderSize = (props.position === 'vertical') ? props.slider.height() : props.slider.outerWidth();
-    console.log(sliderSize);
     let shiftUnit = (props.max - props.min) / sliderSize;
     this.shiftUnit = Math.ceil(shiftUnit); // ratio of slider width and min-max width
     console.log('pace:' + this.shiftUnit);
@@ -113,7 +112,7 @@ renderInputValue = (i: number) => {
         this['shift_btn_' + i] =  maxShift;
     };
 
-    let value = this.shiftUnit * this['shift_btn_' + i];
+    let value: number = this.shiftUnit * this['shift_btn_' + i];
 
     let roundValue = ():number => { // round value for input
         if (props.pace !== 1 &&  props.pace !== 0) {
@@ -127,22 +126,46 @@ renderInputValue = (i: number) => {
     props['input_' + i].val(roundedValue);
 }
 
-move_btn_1_vert = (event: MouseEvent) => {
+move_btn_1_vert = (event: MouseEvent):void => {
     let props = this.props;
     let sliderCoords = props.getCoords(props.slider);
-    let shift_btn_1 = event.pageY - sliderCoords.top - props.btn_1.height() / 2 ;
+    let coordinateEvent: number;
+    let btnSize: number;
+    let keyMin: string;
+    let top1: number;
+    let bottom1: number;
+
+    if (props.position === 'vertical') {
+        coordinateEvent = event.pageY;
+        btnSize = props.btn_1.height() / 2;
+        top1 = sliderCoords.top;
+        bottom1 = props.btn_2.position().top; // TODO DELETE OR DRY FUNCTIONS
+        keyMin = `top`;
+        
+    } else {
+        coordinateEvent = event.pageX;
+        btnSize = props.btn_1.innerWidth() / 2;
+        top1 = sliderCoords.left;
+        bottom1 = props.btn_2.position().left;
+    }
+
+
+    let shift_btn_1 = coordinateEvent - sliderCoords[keyMin] - btnSize;
+
+    // let shift_btn_1 = event.pageY - sliderCoords.top - props.btn_1.innerHeight() / 2 ;
+
     this.shift_btn_1 = shift_btn_1;
     
-    let top1 = sliderCoords.top;
-    let bottom1 = props.btn_2.position().top;
+    // let top1 = sliderCoords.top;
+    // let bottom1 = props.btn_2.position().top;
 
-    props.btn_1.css({'top': shift_btn_1  + 'px'});
+    props.btn_1.css({'top': shift_btn_1 +'px'});
 
-    if (props.btn_1.offset().top > bottom1) {
-        props.btn_1.css({'top': props.btn_2.css('top') - 100 + 'px'});
+    if (props.btn_1.offset()[keyMin] > bottom1) {
+        props.btn_1.css({keyMin: props.btn_2.css(keyMin) - 100 + 'px'});
     }
-    if(props.btn_1.offset().top < top1){
-        props.btn_1.css({'top': 0 + 'px'});
+    if(props.btn_1.offset()[keyMin] < top1){
+        props.btn_1.css({keyMin: 0 + 'px'});
     }
     props.betweenSettingVert();
     this.renderInputValue(1);
@@ -152,7 +175,7 @@ move_btn_1_vert = (event: MouseEvent) => {
     };
 }
 
-move_btn_1 = (event: MouseEvent) => {
+move_btn_1 = (event: MouseEvent):void => {
     let props = this.props;
     let sliderCoords = props.getCoords(props.slider);
     let shift_btn_1 = event.pageX - sliderCoords.left - props.btn_1.innerWidth() / 2 ;
@@ -178,7 +201,7 @@ move_btn_1 = (event: MouseEvent) => {
 }
 
 
-move_btn_2_vert = (event: MouseEvent) => {
+move_btn_2_vert = (event: MouseEvent):void => {
     let props = this.props;
     let sliderCoords = props.getCoords(props.slider);
     let shift_btn_2 = event.pageY - sliderCoords.top - props.btn_2.innerHeight() / 2 - parseInt(props.btn_2.css('marginTop')); 
@@ -205,7 +228,7 @@ move_btn_2_vert = (event: MouseEvent) => {
     };
 }
 
-move_btn_2 = (event: MouseEvent) => {
+move_btn_2 = (event: MouseEvent):void => {
     let props = this.props;
     let sliderCoords = props.getCoords(props.slider);
     let shift_btn_2 = event.pageX - sliderCoords.left - props.btn_2.innerWidth() / 2 - parseInt(props.btn_2.css('marginLeft')); 
@@ -254,43 +277,33 @@ class ViewSlider {
 class ViewBtn extends ViewSlider {
     btnMove() {
         let props = this.controller.props;
-        let vert = () => {
-            props.btn_1.css({'top': props.btn1Value / this.controller.shiftUnit  + 'px'});
-            props.btn_2.css({'top': props.btn2Value / this.controller.shiftUnit + 'px'});
-    
+        let onBtnMove = (onBtn1: object, onBtn2: object):void => {
             props.btn_1.on('mousedown', () => {
-                props.btn_1.on('mousemove', this.controller.move_btn_1_vert);
+                props.btn_1.on('mousemove', onBtn1);
                 props.btn_1.on('mouseup', () => {
-                    props.btn_1.off('mousemove', this.controller.move_btn_1_vert);
+                    props.btn_1.off('mousemove', onBtn1);
                 });
             });
             props.btn_2.on('mousedown', () => {
-                props.btn_2.on('mousemove', this.controller.move_btn_2_vert);
+                props.btn_2.on('mousemove', onBtn2);
                 props.btn_2.on('mouseup', () => {
-                    props.btn_2.off('mousemove', this.controller.move_btn_2_vert);
+                    props.btn_2.off('mousemove', onBtn2);
                 });
             });
         }
         if (props.position === 'vertical' ) {
-            vert();
+            props.btn_1.css({'top': props.btn1Value / this.controller.shiftUnit  + 'px'});
+            props.btn_2.css({'top': props.btn2Value / this.controller.shiftUnit + 'px'});
+            const onBtn1 = this.controller.move_btn_1_vert;
+            const onBtn2 = this.controller.move_btn_2_vert;
+            onBtnMove(onBtn1, onBtn2);
         } else {
             props.btn_1.css({'left': props.btn1Value / this.controller.shiftUnit  + 'px'});
             props.btn_2.css({'left': props.btn2Value / this.controller.shiftUnit + 'px'});
-    
-            props.btn_1.on('mousedown', () => {
-                props.btn_1.on('mousemove', this.controller.move_btn_1);
-                props.btn_1.on('mouseup', () => {
-                    props.btn_1.off('mousemove', this.controller.move_btn_1);
-                });
-            });
-            props.btn_2.on('mousedown', () => {
-                props.btn_2.on('mousemove', this.controller.move_btn_2);
-                props.btn_2.on('mouseup', () => {
-                    props.btn_2.off('mousemove', this.controller.move_btn_2);
-                });
-            });
+            const onBtn1 = this.controller.move_btn_1;
+            const onBtn2 = this.controller.move_btn_2;
+            onBtnMove(onBtn1, onBtn2);
         }
-
     }
 }
 

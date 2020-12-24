@@ -1,3 +1,5 @@
+
+
 // let move_btn_1 = (event) => {
 //     this.shift_1 = event.pageX - this.shift_1.left;
 //     this.shift_2 = event.pageX - this.shift_2.left; 
