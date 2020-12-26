@@ -1,14 +1,6 @@
 (function($){
     jQuery.fn.responsiveBlock = function(){
       let make = function(){
-        // console.log(this);
-        // $(this).css("background-color",options.defColor)
-        // .mouseenter( function(){
-        //   $(this).css("background-color",options.hoverColor);
-        // })
-        // .mouseleave( function(){
-        //   $(this).css("background-color",options.defColor);
-        // });
         this.html = `<div class="range__slider-range ${this}"></div>
         <button class="range__slider-handle range__btn-1"></button>
         <button class="range__slider-handle range-btn-2"></button>`

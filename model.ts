@@ -327,7 +327,7 @@ class Between extends ViewSlider {
     }
 }
 
-let createSlider = (name: string, place: object, min: number = 0, max: number = 5000, btn1Value: number = 500, btn2Value: number = 1500, pace: number = 50, position: string = 'horizontal'):void => {
+let createSlider = (name: string, place: object, min: number = 0, max: number = 5000, btn1Value: number = 500, btn2Value: number = 1500, pace: number = 50, position: string = 'horizontal'):any => {
     let model = new ModelSlider(name, place);
     model.setSlider();
     model.settings( min, max, btn1Value, btn2Value, pace, position);
@@ -343,8 +343,12 @@ let createSlider = (name: string, place: object, min: number = 0, max: number = 
     input.renderInput();
     let between = new Between(controller);
     between.betweenChange();
+    return true;
 }
 createSlider('id-name', $('#range-1'));
 createSlider('name-name', $('#range-2'), 0, 2000, 100, 2300);
 createSlider('$', $('#range-3'), 0,2000, 50, 1500, 10, 'vertical');
 createSlider('&', $('#range-4'), 0,3000, 300, 2400, 100, 'vertical');
+
+const testWorks = () => true;
+module.exports = { createSlider, testWorks };
