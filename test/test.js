@@ -1,9 +1,8 @@
-const testWorks = require('../model.js');
+const { ModelSlider, ControllerSlider, ViewBtn, Between, Input, createSlider} = require('../model.js');
 
-test('Test', () => {
-    const test = testWorks.createSlider();
-    expect(test).toBeTruthy();
+test('return slider', () => {
+    const model = new ModelSlider();
+    expect(model).toBeTruthy();
+    const coordinates = model.getCoords($('body'));
+    expect(coordinates).toBeDefined();
 });
-
-
-
