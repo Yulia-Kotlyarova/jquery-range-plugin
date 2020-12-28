@@ -292,13 +292,14 @@ var Between = /** @class */ (function (_super) {
     };
     return Between;
 }(ViewSlider));
-var createSlider = function (name, place, min, max, btn1Value, btn2Value, pace, position) {
+var createSlider = function (name, place, min, max, btn1Value, btn2Value, pace, position, test) {
     if (min === void 0) { min = 0; }
     if (max === void 0) { max = 5000; }
     if (btn1Value === void 0) { btn1Value = 500; }
     if (btn2Value === void 0) { btn2Value = 1500; }
     if (pace === void 0) { pace = 50; }
     if (position === void 0) { position = 'horizontal'; }
+    if (test === void 0) { test = false; }
     var model = new ModelSlider(name, place);
     model.setSlider();
     model.settings(min, max, btn1Value, btn2Value, pace, position);
@@ -312,7 +313,9 @@ var createSlider = function (name, place, min, max, btn1Value, btn2Value, pace, 
     input.renderInput();
     var between = new Between(controller);
     between.betweenChange();
-    // return { model, view, controller };
+    if (test === true) {
+        return { model: model, view: view, controller: controller };
+    }
 };
 createSlider('id-name', $('#range-1'));
 createSlider('name-name', $('#range-2'), 0, 2000, 100, 2300);

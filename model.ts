@@ -49,8 +49,8 @@ class ModelSlider {
     }
 
     betweenSetting = ():void => {
-        let between_width = this.btn_2.offset().left - this.btn_1.offset().left;
-        let between_shift = this.btn_1.css('left');
+        let between_width: number = this.btn_2.offset().left - this.btn_1.offset().left;
+        let between_shift: number = this.btn_1.css('left');
         this.between.css({'width': between_width + 'px', 'left': between_shift});
     }
 
@@ -327,7 +327,7 @@ class Between extends ViewSlider {
     }
 }
 
-let createSlider = (name: string, place: object, min: number = 0, max: number = 5000, btn1Value: number = 500, btn2Value: number = 1500, pace: number = 50, position: string = 'horizontal'):any => {
+let createSlider = (name: string, place: object, min: number = 0, max: number = 5000, btn1Value: number = 500, btn2Value: number = 1500, pace: number = 50, position: string = 'horizontal', test = false):any => {
     let model = new ModelSlider(name, place);
     model.setSlider();
     model.settings( min, max, btn1Value, btn2Value, pace, position);
@@ -343,7 +343,9 @@ let createSlider = (name: string, place: object, min: number = 0, max: number = 
     input.renderInput();
     let between = new Between(controller);
     between.betweenChange();
-    // return { model, view, controller };
+    if (test === true) {
+        return { model, view, controller };
+    }
 }
 createSlider('id-name', $('#range-1'));
 createSlider('name-name', $('#range-2'), 0, 2000, 100, 2300);
